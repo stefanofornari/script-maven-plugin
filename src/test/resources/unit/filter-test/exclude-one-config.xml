@@ -1,0 +1,26 @@
+<project>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>script-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <passProjectAsProperty>true</passProjectAsProperty>
+                    <language>javascript</language>
+                    <excludes>
+                        <exclude>**/l2-1.js</exclude>
+                    </excludes>
+                    <script>var executed=true;</script>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

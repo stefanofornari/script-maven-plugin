@@ -1,0 +1,23 @@
+<project>
+
+    <build>
+        <scriptDirectory>pippo</scriptDirectory>
+        <plugins>
+            <plugin>
+                <artifactId>script-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <passProjectAsProperty>true</passProjectAsProperty>
+                    <language>javascript</language>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,21 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>script-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <language>javascript</language>
+                    <passProjectAsProperty>true</passProjectAsProperty>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
