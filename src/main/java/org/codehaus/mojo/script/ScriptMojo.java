@@ -118,48 +118,97 @@ public class ScriptMojo extends AbstractMojo {
      */
     private ScriptEngine engine;
 
+    // ---------------------------------------------------------- Public methods
+
+    /**
+     * @return the project
+     */
+    public MavenProject getProject() {
+        return project;
+    }
+
+    /**
+     * @return the script
+     */
+    public String getScript() {
+        return script;
+    }
+
+    /**
+     * @return the passProjectAsProperty
+     */
+    public boolean isPassProjectAsProperty() {
+        return passProjectAsProperty;
+    }
+
+    /**
+     * @return the nameOfProjectProperty
+     */
+    public String getNameOfProjectProperty() {
+        return nameOfProjectProperty;
+    }
+
+    /**
+     * @return the language
+     */
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * @return the extension
+     */
+    public String getExtension() {
+        return extension;
+    }
+
+    /**
+     * @return the mimeType
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    /**
+     * @return the excludes
+     */
+    public String[] getExcludes() {
+        return excludes;
+    }
+
+    /**
+     * @return the includes
+     */
+    public String[] getIncludes() {
+        return includes;
+    }
+
+    /**
+     * @return the engine
+     */
+    public ScriptEngine getEngine() {
+        return engine;
+    }
 
     /**
      * Loads and executes a script.
      *
      * @throws MojoExecutionException if script cannot be loaded or executed.
+     *
+     * @Override
      */
     public void execute() throws MojoExecutionException {
-        ScriptEngineManager engineManager = new ScriptEngineManager();
-
-        if (language != null) {
-            if ((engine = engineManager.getEngineByName(language)) == null) {
-                throw new MojoExecutionException("No engine with language " + language + " has been found");
-            }
-        } else if (extension != null) {
-            if ((engine = engineManager.getEngineByExtension(extension)) == null) {
-                throw new MojoExecutionException("No engine with extension " + extension + " has been found");
-            }
-        } else if (mimeType != null) {
-            if ((engine = engineManager.getEngineByMimeType(mimeType)) == null) {
-                throw new MojoExecutionException("No engine with mimeType " + mimeType + " has been found");
-            }
-        } else {
-            throw new MojoExecutionException("One of language|extension|mimeType must be specified");
-        }
-
-        if ( passProjectAsProperty ) {
-            if (nameOfProjectProperty == null) {
-                nameOfProjectProperty = DEFAULT_NAME_OF_PROJECT_PROPERTY;
-            }
-            engine.put(nameOfProjectProperty, project);
-        }
-
         try {
+            createEngine();
             executeScripts();
             executeInlineScript();
-        } catch ( Exception e ) {
-            throw new MojoExecutionException( e.getMessage(), e );
+        } catch (Throwable t) {
+            throw new MojoExecutionException( t.getMessage(), t );
         }
         
     }
 
-    // --------------------------------------------------------- Private methods
+    // ------------------------------------------------------- Protected methods
 
     /**
      * Executes the scripts in the script directory. Includes and excludes
@@ -167,20 +216,26 @@ public class ScriptMojo extends AbstractMojo {
      *
      * @throws ScriptException if there is an error in the execution of a scripts
      */
-    private void executeScripts() throws ScriptException, IOException {
+    protected void executeScripts() throws ScriptException, IOException {
         ArrayList<String> scriptFileNames = new ArrayList<String>();
 
         DirectoryScanner ds = new DirectoryScanner();
         ds.setCaseSensitive(true);
 
-        if (includes != null) {
-            ds.setIncludes(includes);
+        if (getIncludes() != null) {
+            ds.setIncludes(getIncludes());
         }
-        if (excludes != null) {
-            ds.setExcludes(excludes);
+        if (getExcludes() != null) {
+            ds.setExcludes(getExcludes());
         }
         
-        for (Object d: project.getScriptSourceRoots()) {
+        for (Object d: getProject().getScriptSourceRoots()) {
+            if (!new File((String)d).isDirectory()) {
+                if (getLog().isWarnEnabled()) {
+                    getLog().warn("Script directory " + d + " not found, ignoring.");
+                }
+                continue;
+            }
             ds.setBasedir((String)d);
             ds.scan();
 
@@ -190,7 +245,7 @@ public class ScriptMojo extends AbstractMojo {
         }
 
         for (String fileName: scriptFileNames) {
-            engine.eval(new FileReader(fileName));
+            getEngine().eval(new FileReader(fileName));
         }
 
     }
@@ -201,9 +256,41 @@ public class ScriptMojo extends AbstractMojo {
      * @throws ScriptException if there is an error in the execution of a scripts
      *
      */
-    private void executeInlineScript() throws ScriptException {
-        if (script != null) {
-            engine.eval(script);
+    protected void executeInlineScript() throws ScriptException {
+        if (getScript() != null) {
+            getEngine().eval(getScript());
+        }
+    }
+
+    /**
+     * Creates the script engine given the configured parameters.
+     *
+     * @throws RuntimeException in case the engine cannot be created
+     */
+    protected void createEngine() throws RuntimeException {
+        ScriptEngineManager engineManager = new ScriptEngineManager();
+
+        if (getLanguage() != null) {
+            if ((engine = engineManager.getEngineByName(getLanguage())) == null) {
+                throw new RuntimeException("No engine with language " + getLanguage() + " has been found");
+            }
+        } else if (getExtension() != null) {
+            if ((engine = engineManager.getEngineByExtension(getExtension())) == null) {
+                throw new RuntimeException("No engine with extension " + getExtension() + " has been found");
+            }
+        } else if (getMimeType() != null) {
+            if ((engine = engineManager.getEngineByMimeType(getMimeType())) == null) {
+                throw new RuntimeException("No engine with mimeType " + getMimeType() + " has been found");
+            }
+        } else {
+            throw new RuntimeException("One of language|extension|mimeType must be specified");
+        }
+
+        if ( isPassProjectAsProperty() ) {
+            if (getNameOfProjectProperty() == null) {
+                nameOfProjectProperty = DEFAULT_NAME_OF_PROJECT_PROPERTY;
+            }
+            engine.put(getNameOfProjectProperty(), getProject());
         }
     }
 }
