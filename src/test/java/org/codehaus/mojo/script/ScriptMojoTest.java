@@ -17,8 +17,8 @@ package org.codehaus.mojo.script;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
-import javax.script.ScriptEngine;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
@@ -56,15 +56,6 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
         return mojo;
     }
 
-    private ScriptEngine getEngine(ScriptMojo mojo)
-    throws NoSuchFieldException, IllegalAccessException {
-        Field f = mojo.getClass().getDeclaredField("engine");
-
-        f.setAccessible(true);
-
-        return (ScriptEngine)f.get(mojo);
-    }
-
     private void _testConfigurationKo(String pomFileName) throws Exception {
         ScriptMojo mojo = getScriptMojo(pomFileName);
         try {
@@ -92,27 +83,36 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
         _testConfigurationKo("target/test-classes/unit/basic-test/invalid-mime-config.xml");
     }
 
+    public void testCreateEngine() throws Exception {
+        ScriptMojo mojo = getScriptMojo("target/test-classes/unit/basic-test/language-config.xml");
+
+        Method m = mojo.getClass().getDeclaredMethod("createEngine");
+        m.setAccessible(true);
+        m.invoke(mojo);
+        assertNotNull(mojo.getEngine());
+    }
+
     public void testInLineScript() throws Exception {
         ScriptMojo mojo = getScriptMojo("target/test-classes/unit/basic-test/inline-script-config.xml");
 
         mojo.execute();
 
-        assertTrue((Boolean)getEngine(mojo).get("executed"));
+        assertTrue((Boolean)mojo.getEngine().get("executed"));
     }
 
     public void testProjectProperty() throws Exception {
         ScriptMojo mojo
             = getScriptMojo("target/test-classes/unit/basic-test/project-no-config.xml");
         mojo.execute();
-        assertNull(getEngine(mojo).get("project"));
+        assertNull(mojo.getEngine().get("project"));
 
         mojo = getScriptMojo("target/test-classes/unit/basic-test/project-default-config.xml");
         mojo.execute();
-        assertNotNull(getEngine(mojo).get("project"));
+        assertNotNull(mojo.getEngine().get("project"));
 
         mojo = getScriptMojo("target/test-classes/unit/basic-test/project-property-config.xml");
         mojo.execute();
-        assertNotNull(getEngine(mojo).get("newproject"));
+        assertNotNull(mojo.getEngine().get("newproject"));
     }
 
     public void testScriptsAll() throws Exception {
@@ -120,7 +120,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertEquals("undefined,l0-1.js,l1-1.js,l2-1.js,l2-2.js", getEngine(mojo).get("result"));
+        assertEquals("undefined,l0-1.js,l1-1.js,l2-1.js,l2-2.js", mojo.getEngine().get("result"));
     }
 
     public void testOneScript() throws Exception {
@@ -129,7 +129,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertEquals("undefined,l0-1.js", getEngine(mojo).get("result"));
+        assertEquals("undefined,l0-1.js", mojo.getEngine().get("result"));
     }
 
     public void testInlineScriptOnly() throws Exception {
@@ -138,8 +138,8 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertNull(getEngine(mojo).get("result"));
-        assertTrue((Boolean)getEngine(mojo).get("executed"));
+        assertNull(mojo.getEngine().get("result"));
+        assertTrue((Boolean)mojo.getEngine().get("executed"));
     }
 
     public void testExcludeOne() throws Exception {
@@ -148,7 +148,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertEquals("undefined,l0-1.js,l1-1.js,l2-2.js", getEngine(mojo).get("result"));
+        assertEquals("undefined,l0-1.js,l1-1.js,l2-2.js", mojo.getEngine().get("result"));
     }
 
 }
