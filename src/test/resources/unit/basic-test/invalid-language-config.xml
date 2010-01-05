@@ -13,6 +13,7 @@
                 </executions>
                 <configuration>
                     <language>invalidlanguage</language>
+                    <script>something</script>
                 </configuration>
             </plugin>
         </plugins>

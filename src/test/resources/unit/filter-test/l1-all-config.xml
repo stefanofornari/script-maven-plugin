@@ -15,7 +15,6 @@
                 </executions>
                 <configuration>
                     <passProjectAsProperty>true</passProjectAsProperty>
-                    <language>javascript</language>
                 </configuration>
             </plugin>
         </plugins>

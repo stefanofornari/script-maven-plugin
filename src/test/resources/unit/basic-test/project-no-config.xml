@@ -12,7 +12,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <language>javascript</language>
                 </configuration>
             </plugin>
         </plugins>

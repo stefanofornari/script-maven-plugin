@@ -73,23 +73,14 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
     }
 
     public void testConfiguration() throws Exception {
-        _testConfigurationKo("target/test-classes/unit/basic-test/empty-config.xml");
+        _testConfigurationOk("target/test-classes/unit/basic-test/empty-config.xml");
 
-        _testConfigurationOk("target/test-classes/unit/basic-test/language-config.xml");
-        _testConfigurationOk("target/test-classes/unit/basic-test/extension-config.xml");
-        _testConfigurationOk("target/test-classes/unit/basic-test/mime-config.xml");
+        ScriptMojo mojo = 
+            getScriptMojo("target/test-classes/unit/basic-test/language-config.xml");
+        mojo.execute();
+        assertTrue((Boolean)mojo.getEngine("js").get("executed"));
+        
         _testConfigurationKo("target/test-classes/unit/basic-test/invalid-language-config.xml");
-        _testConfigurationKo("target/test-classes/unit/basic-test/invalid-extension-config.xml");
-        _testConfigurationKo("target/test-classes/unit/basic-test/invalid-mime-config.xml");
-    }
-
-    public void testCreateEngine() throws Exception {
-        ScriptMojo mojo = getScriptMojo("target/test-classes/unit/basic-test/language-config.xml");
-
-        Method m = mojo.getClass().getDeclaredMethod("createEngine");
-        m.setAccessible(true);
-        m.invoke(mojo);
-        assertNotNull(mojo.getEngine());
     }
 
     public void testInLineScript() throws Exception {
@@ -97,22 +88,22 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertTrue((Boolean)mojo.getEngine().get("executed"));
+        assertTrue((Boolean)mojo.getEngine("js").get("executed"));
     }
 
     public void testProjectProperty() throws Exception {
         ScriptMojo mojo
             = getScriptMojo("target/test-classes/unit/basic-test/project-no-config.xml");
         mojo.execute();
-        assertNull(mojo.getEngine().get("project"));
+        assertNull(mojo.getEngine("js").get("project"));
 
         mojo = getScriptMojo("target/test-classes/unit/basic-test/project-default-config.xml");
         mojo.execute();
-        assertNotNull(mojo.getEngine().get("project"));
+        assertNotNull(mojo.getEngine("js").get("project"));
 
         mojo = getScriptMojo("target/test-classes/unit/basic-test/project-property-config.xml");
         mojo.execute();
-        assertNotNull(mojo.getEngine().get("newproject"));
+        assertNotNull(mojo.getEngine("js").get("newproject"));
     }
 
     public void testScriptsAll() throws Exception {
@@ -120,7 +111,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertEquals("undefined,l0-1.js,l1-1.js,l2-1.js,l2-2.js", mojo.getEngine().get("result"));
+        assertEquals("undefined,l0-1.js,l1-1.js,l2-1.js,l2-2.js", mojo.getEngine("js").get("result"));
     }
 
     public void testOneScript() throws Exception {
@@ -129,7 +120,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertEquals("undefined,l0-1.js", mojo.getEngine().get("result"));
+        assertEquals("undefined,l0-1.js", mojo.getEngine("js").get("result"));
     }
 
     public void testInlineScriptOnly() throws Exception {
@@ -138,8 +129,8 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertNull(mojo.getEngine().get("result"));
-        assertTrue((Boolean)mojo.getEngine().get("executed"));
+        assertNull(mojo.getEngine("js").get("result"));
+        assertTrue((Boolean)mojo.getEngine("js").get("executed"));
     }
 
     public void testExcludeOne() throws Exception {
@@ -148,7 +139,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
 
         mojo.execute();
 
-        assertEquals("undefined,l0-1.js,l1-1.js,l2-2.js", mojo.getEngine().get("result"));
+        assertEquals("undefined,l0-1.js,l1-1.js,l2-2.js", mojo.getEngine("js").get("result"));
     }
 
 }

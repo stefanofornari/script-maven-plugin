@@ -14,7 +14,6 @@
                 </executions>
                 <configuration>
                     <passProjectAsProperty>true</passProjectAsProperty>
-                    <language>javascript</language>
                     <includes>
                         <include>l0-1.js</include>
                     </includes>

@@ -14,10 +14,10 @@
                 </executions>
                 <configuration>
                     <passProjectAsProperty>true</passProjectAsProperty>
-                    <language>javascript</language>
                     <excludes>
                         <exclude>**/l2-1.js</exclude>
                     </excludes>
+                    <language>js</language>
                     <script>var executed=true;</script>
                 </configuration>
             </plugin>

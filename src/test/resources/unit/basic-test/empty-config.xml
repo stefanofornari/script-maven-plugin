@@ -11,8 +11,7 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                </configuration>
+                <configuration></configuration>
             </plugin>
         </plugins>
     </build>
