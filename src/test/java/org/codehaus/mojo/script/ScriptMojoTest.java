@@ -17,8 +17,8 @@ package org.codehaus.mojo.script;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
+import javax.script.ScriptException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
@@ -62,6 +62,14 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
             mojo.execute();
             fail("The execution was supposed to fail, but it did not.");
         } catch (MojoExecutionException e) {
+            Throwable t = e.getCause();
+            if (t != null) {
+                if (!((t instanceof EngineNotFoundException) ||
+                      (t instanceof ScriptException))) {
+                    fail("Execution failed for unknown reason: " + e.getCause().getMessage());
+            
+                }
+            }
             // this is ok
         }
     }
@@ -81,6 +89,7 @@ public class ScriptMojoTest extends AbstractMojoTestCase {
         assertTrue((Boolean)mojo.getEngine("js").get("executed"));
         
         _testConfigurationKo("target/test-classes/unit/basic-test/invalid-language-config.xml");
+        _testConfigurationKo("target/test-classes/unit/basic-test/missing-language-config.xml");
     }
 
     public void testInLineScript() throws Exception {
