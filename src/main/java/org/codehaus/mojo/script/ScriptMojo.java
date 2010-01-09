@@ -42,6 +42,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 public class ScriptMojo extends AbstractMojo {
 
     public static final String DEFAULT_NAME_OF_PROJECT_PROPERTY = "project";
+
     /**
      * The project to create a build for.
      *
@@ -49,6 +50,7 @@ public class ScriptMojo extends AbstractMojo {
      * @required
      */
     private MavenProject project;
+
     /**
      * The location in-line script to be executed. Note that this is executed
      * after the scripts included in src/main/scripts.
@@ -56,24 +58,27 @@ public class ScriptMojo extends AbstractMojo {
      * @parameter
      */
     private String script;
+
     /**
      * Pass the project object in as a property to your script.
      *
      * @parameter default-value="false"
      */
     private boolean passProjectAsProperty;
+
     /**
      * Name for project object as a property in your script.
      *
      * @parameter default-value="project"
      */
     private String nameOfProjectProperty;
+
     /**
      * Optional extension of language fo the inline script if given.
      *
      * @parameter
-     * @required
      */
+
     private String language;
     
     /**
@@ -82,66 +87,20 @@ public class ScriptMojo extends AbstractMojo {
      * @parameter
      */
     private String[] excludes;
+
     /**
      * Patterns of the script files to include for execution
      *
      * @parameter
      */
     private String[] includes;
+
     /**
      * The engine created when the mojo is executed.
      */
     private Map<String, ScriptEngine> engines;
 
     // ---------------------------------------------------------- Public methods
-    /**
-     * @return the project
-     */
-    public MavenProject getProject() {
-        return project;
-    }
-
-    /**
-     * @return the script
-     */
-    public String getScript() {
-        return script;
-    }
-
-    /**
-     * @return the passProjectAsProperty
-     */
-    public boolean isPassProjectAsProperty() {
-        return passProjectAsProperty;
-    }
-
-    /**
-     * @return the nameOfProjectProperty
-     */
-    public String getNameOfProjectProperty() {
-        return nameOfProjectProperty;
-    }
-
-    /**
-     * @return the language
-     */
-    public String getLanguage() {
-        return language;
-    }
-
-    /**
-     * @return the excludes
-     */
-    public String[] getExcludes() {
-        return excludes;
-    }
-
-    /**
-     * @return the includes
-     */
-    public String[] getIncludes() {
-        return includes;
-    }
 
     /**
      * Returns the ScripEngine for the given script extension. Engines are
@@ -171,11 +130,11 @@ public class ScriptMojo extends AbstractMojo {
                 throw new EngineNotFoundException(extension);
             }
 
-            if (isPassProjectAsProperty()) {
-                if (getNameOfProjectProperty() == null) {
+            if (passProjectAsProperty) {
+                if (nameOfProjectProperty == null) {
                     nameOfProjectProperty = DEFAULT_NAME_OF_PROJECT_PROPERTY;
                 }
-                engine.put(getNameOfProjectProperty(), getProject());
+                engine.put(nameOfProjectProperty, project);
             }
             engines.put(extension, engine);
         }
@@ -199,27 +158,27 @@ public class ScriptMojo extends AbstractMojo {
 
     }
 
-    // ------------------------------------------------------- Protected methods
+    // --------------------------------------------------------- Private methods
     /**
      * Executes the scripts in the script directory. Includes and excludes
      * patterns are used to filter the scripts to execute.
      *
      * @throws ScriptException if there is an error in the execution of a scripts
      */
-    protected void executeScripts() throws ScriptException, IOException {
+    private void executeScripts() throws ScriptException, IOException {
         ArrayList<String> scriptFileNames = new ArrayList<String>();
 
         DirectoryScanner ds = new DirectoryScanner();
         ds.setCaseSensitive(true);
 
-        if (getIncludes() != null) {
-            ds.setIncludes(getIncludes());
+        if (includes != null) {
+            ds.setIncludes(includes);
         }
-        if (getExcludes() != null) {
-            ds.setExcludes(getExcludes());
+        if (excludes != null) {
+            ds.setExcludes(excludes);
         }
 
-        for (Object d : getProject().getScriptSourceRoots()) {
+        for (Object d : project.getScriptSourceRoots()) {
             if (!new File((String) d).isDirectory()) {
                 if (getLog().isWarnEnabled()) {
                     getLog().warn("Script directory " + d + " not found, ignoring.");
@@ -256,15 +215,23 @@ public class ScriptMojo extends AbstractMojo {
      * @throws ScriptException if there is an error in the execution of a scripts
      *
      */
-    protected void executeInlineScript() 
+    private void executeInlineScript()
     throws EngineNotFoundException, ScriptException {
-        String s = getScript();
-
-        getLog().info("script: " + s);
-
-        if (s != null) {
-            getEngine(getLanguage()).eval(s);
+        if (script == null) {
+            return;
         }
+
+        if (language == null) {
+            throw new EngineNotFoundException("language cannot be null if an inline script is provided");
+        }
+        getEngine(language).eval(script);
+    }
+
+    /**
+     * @param project the project to set
+     */
+    public void setProject(MavenProject project) {
+        this.project = project;
     }
 
 }
